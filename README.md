@@ -1,6 +1,7 @@
 # Camus
 **Camus is a raw SQL library enabling an ease integration with the new [Aurora Serverless Data API]("https://aws.amazon.com/blogs/aws/new-data-api-for-amazon-aurora-serverless/"). It is a fork of the powerful [Records]("https://github.com/kennethreitz/records") library.**
 
+![Camus Aurora Execution](https://raw.githubusercontent.com/rizidoro/camus/master/camus.png)
 ## Instalation
 
 The recommended installation method is `pipenv`:
