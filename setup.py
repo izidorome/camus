@@ -8,7 +8,7 @@ setuptools.setup(
     author_email="izidoro.rafa@gmail.com",
     url="https://github.com/rizidoro/camus",
     name="camus",
-    version="0.1.1",
+    version="0.2.0",
     py_modules = ['camus'],
     package_data={'': ['LICENSE']},
     include_package_data=True,
