@@ -1,5 +1,10 @@
 from inspect import isclass
 from collections import OrderedDict
+from contextlib import contextmanager
+
+import boto3
+
+aurora = boto3.client("rds-data")
 
 
 def isexception(obj):
@@ -151,9 +156,6 @@ class Record(object):
         """Returns the list of values from the query."""
         return self._values
 
-    # def __repr__(self):
-    #     return "<Record {}>".format(self.export("json")[1:-1])
-
     def __getitem__(self, key):
         # Support for index-based lookup.
         if isinstance(key, int):
@@ -191,3 +193,86 @@ class Record(object):
         items = zip(self.keys(), self.values())
 
         return OrderedDict(items) if ordered else dict(items)
+
+
+class Database:
+    def __init__(self, secret_arn, resource_arn, dbname):
+        self._secret_arn = secret_arn
+        self._resource_arn = resource_arn
+        self._dbname = dbname
+        self._transactionId = None
+
+    def _auth(self):
+        return {
+            "secretArn": self._secret_arn,
+            "resourceArn": self._resource_arn,
+        }
+
+    @contextmanager
+    def transaction(self):
+        """A context manager for executing a transaction on this Database."""
+        tx = aurora.begin_transaction(**self._auth(), database=self._dbname)
+        self._transactionId = tx['transactionId']
+
+        try:
+            yield self._transactionId
+            tx.commit()
+        except:
+            aurora.rollback_transaction(**self._auth(), transactionId=tx['transactionId'])
+        finally:
+            self._transactionId = None
+
+
+
+    def query(self, sql, fetchall=False, **params):
+        attrs = {
+            **self._auth(),
+            "database": self._dbname,
+            "sql": f"{sql}",
+            "includeResultMetadata": True,
+        }
+
+        if params:
+            attrs["parameters"] = self._build_parameters(**params)
+
+        if self._transactionId:
+            attrs["transactionId"] = self._transactionId
+
+        result = aurora.execute_statement(**attrs)
+
+        if "records" in result:
+            columns = [meta["label"] for meta in result["columnMetadata"]]
+            values = [self._fetch_value(r) for r in result["records"]]
+
+            row_gen = (Record(columns, row) for row in values)
+
+            records = RecordCollection(row_gen)
+
+            if fetchall:
+                records.all()
+        else:
+            record = Record(["records_updated"], [result["numberOfRecordsUpdated"]])
+            records = RecordCollection(iter([record]))
+
+        return records
+
+    def _fetch_value(self, record):
+        values = [value[0] for value in [list(field.values()) for field in record]]
+
+        return values
+
+    def _build_parameters(self, **params):
+        params = [self._build_field(field, value) for field, value in params.items()]
+        return params
+
+    def _build_field(self, field, value):
+        fieldtype = type(value).__name__
+
+        typemap = {
+            "str": "stringValue",
+            "int": "longValue",
+            "bool": "booleanValue",
+            "float": "doubleValue",
+        }
+
+        return {"name": field, "value": {typemap[fieldtype]: value}}
