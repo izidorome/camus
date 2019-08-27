@@ -60,7 +60,7 @@ Data API transactions are supported by Camus:
 ```python
 with db.transaction() as txid:
     db.query("INSERT INTO users (name, email) VALUES (:name, :email)", name="Rafael", email="rafael@email.com")
-    db.query("UPDATE posts SET title = :title WHERE id = :id, title="New Title", id=999)
+    db.query("UPDATE posts SET title = :title WHERE id = :id, title="New Title", id=999")
 ```
 
 If any exception is raised when executing any of the queries, a rollback is performed automatically.
