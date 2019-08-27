@@ -4,7 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pytest = "==4.6.3"
+pytest = "*"
+twine = "*"
+camus = {editable = true,path = "."}
 
 [packages]
 boto3 = "*"

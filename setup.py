@@ -6,13 +6,15 @@ with open("README.md") as f:
 setuptools.setup(
     author="Rafael Izidoro",
     author_email="izidoro.rafa@gmail.com",
-    url="https://github.com/noverde/camus",
+    url="https://github.com/rizidoro/camus",
     name="camus",
-    version="0.0.1",
+    version="0.1.1",
+    py_modules = ['camus'],
+    package_data={'': ['LICENSE']},
+    include_package_data=True,
     long_description=long_description,
     long_description_content_type="text/markdown",
     description="A Records like database API that works with Aurora Serverless Data API",
-    packages=setuptools.find_packages(exclude=["docs", "tests"]),
     license="MIT",
     install_requires=["boto3"],
     classifiers=[
@@ -27,4 +29,3 @@ setuptools.setup(
         "Topic :: Utilities",
     ],
 )
-
