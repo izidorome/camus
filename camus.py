@@ -222,8 +222,6 @@ class Database:
         finally:
             self._transactionId = None
 
-
-
     def query(self, sql, fetchall=False, **params):
         attrs = {
             **self._auth(),
@@ -259,6 +257,13 @@ class Database:
     def _fetch_value(self, record):
         values = [value[0] for value in [list(field.values()) for field in record]]
 
+        # transform isNull to None
+        keys = [key[0] for key in [list(field.keys()) for field in record]]
+
+        for idx, key in enumerate(keys):
+            if key == 'isNull':
+                values[idx] = None
+
         return values
 
     def _build_parameters(self, **params):
@@ -273,6 +278,10 @@ class Database:
             "int": "longValue",
             "bool": "booleanValue",
             "float": "doubleValue",
+            "NoneType": "isNull"
         }
+
+        if fieldtype == "NoneType":
+            value = True
 
         return {"name": field, "value": {typemap[fieldtype]: value}}
