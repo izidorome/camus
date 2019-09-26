@@ -203,22 +203,21 @@ class Database:
         self._transactionId = None
 
     def _auth(self):
-        return {
-            "secretArn": self._secret_arn,
-            "resourceArn": self._resource_arn,
-        }
+        return {"secretArn": self._secret_arn, "resourceArn": self._resource_arn}
 
     @contextmanager
     def transaction(self):
         """A context manager for executing a transaction on this Database."""
         tx = aurora.begin_transaction(**self._auth(), database=self._dbname)
-        self._transactionId = tx['transactionId']
+        self._transactionId = tx["transactionId"]
 
         try:
             yield self._transactionId
             tx.commit()
         except:
-            aurora.rollback_transaction(**self._auth(), transactionId=tx['transactionId'])
+            aurora.rollback_transaction(
+                **self._auth(), transactionId=tx["transactionId"]
+            )
         finally:
             self._transactionId = None
 
@@ -261,7 +260,7 @@ class Database:
         keys = [key[0] for key in [list(field.keys()) for field in record]]
 
         for idx, key in enumerate(keys):
-            if key == 'isNull':
+            if key == "isNull":
                 values[idx] = None
 
         return values
@@ -278,7 +277,7 @@ class Database:
             "int": "longValue",
             "bool": "booleanValue",
             "float": "doubleValue",
-            "NoneType": "isNull"
+            "NoneType": "isNull",
         }
 
         if fieldtype == "NoneType":
