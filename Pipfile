@@ -7,6 +7,12 @@ verify_ssl = true
 pytest = "*"
 twine = "*"
 camus = {editable = true,path = "."}
+invoke = "*"
+ipython = "*"
+ipdb = "*"
+flake8 = "*"
+sphinx = "*"
+recommonmark = "*"
 
 [packages]
 boto3 = "*"
