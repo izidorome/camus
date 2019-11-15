@@ -216,7 +216,7 @@ class Database:
 
         try:
             yield self._transactionId
-            tx.commit()
+            aurora.commit_transaction(**self._auth(), transactionId=self._transactionId)
         except:
             aurora.rollback_transaction(**self._auth(), transactionId=tx['transactionId'])
         finally:
