@@ -1,5 +1,5 @@
 # Camus
-**Camus is a raw SQL library enabling an ease integration with the new [Aurora Serverless Data API]("https://aws.amazon.com/blogs/aws/new-data-api-for-amazon-aurora-serverless/"). It is a fork of the powerful [Records]("https://github.com/kennethreitz/records") library.**
+**Camus is a raw SQL library enabling an ease integration with the new [Aurora Serverless Data API]("https://aws.amazon.com/blogs/aws/new-data-api-for-amazon-aurora-serverless/"). Its API is based on the powerful [Records]("https://github.com/kennethreitz/records") library.**
 
 ![Camus Aurora Execution](https://raw.githubusercontent.com/rizidoro/camus/master/camus.png)
 ## Instalation
@@ -14,7 +14,7 @@ $ pipenv install camus
 
 First you need to have an Aurora cluster ARN and a Secret ARN. If don't have one yet, just follow the [Data API Getting Started Guide]("https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/data-api.html").
 
-With that in hands, let's drop some query to our database:
+With that in hands, let's drop some query in our database:
 
 ```python
 import camus
@@ -42,7 +42,7 @@ Or iterate over them:
      print(r.name, r.email)
 ```
 
-Like mentioned before, Camus is a fork of the Records library, so almost all access pattern are equal:
+Like mentioned before, Camus tries to maintain the same API of the Records library, so you have the same access patterns:
 
 ```python
   row.email
