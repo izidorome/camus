@@ -213,20 +213,15 @@ class Database:
         """A context manager for executing a transaction on this Database."""
         tx = aurora.begin_transaction(**self._auth(), database=self._dbname)
         self._transactionId = tx['transactionId']
-        tx_err_bool = False
-        tx_err = None
 
         try:
             yield self._transactionId
             aurora.commit_transaction(**self._auth(), transactionId=self._transactionId)
-        except ValueError as e:
+        except:
             aurora.rollback_transaction(**self._auth(), transactionId=tx['transactionId'])
-            tx_err_bool = True
-            tx_err = e
+            raise
         finally:
             self._transactionId = None
-            if tx_err_bool:
-                raise tx_err
 
     def query(self, sql, fetchall=False, **params):
         attrs = {
