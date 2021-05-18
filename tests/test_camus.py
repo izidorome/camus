@@ -150,3 +150,13 @@ class TestRecord:
         record = camus.Record(keys, values)
         with raises(KeyError):
             record["email"]
+
+class TestTransaction:
+    def test_raise(self):
+        try:
+            camus.Database().transaction()
+        except:
+            assert 1 == 1
+        else:
+            assert 1== 2
+            
