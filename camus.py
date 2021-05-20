@@ -221,7 +221,7 @@ class Database:
             yield self._transactionId
             self._conn.commit_transaction(**self._auth(), transactionId=self._transactionId)
         except:
-            self._conn.rollback_transaction(**self._auth(), transactionId=tx['transactionId'])
+            self._conn.rollback_transaction(**self._auth(), transactionId=self._transactionId)
             raise
         finally:
             self._transactionId = None

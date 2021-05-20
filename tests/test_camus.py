@@ -14,17 +14,17 @@ def check_id(i, row):
 
 
 class MockAurora:
-    def begin_transaction(**kwargs):
+    def begin_transaction(self, secretArn, resourceArn, database):
+        return {"transactionId": "transactionId"}
+
+    def commit_transaction(self, secretArn, resourceArn, transactionId):
+        raise Exception("commit_transaction_error") 
+
+    def rollback_transaction(self, secretArn, resourceArn, transactionId):
         pass
 
-    def commit_transaction(**kwargs):
-        pass
-
-    def rollback_transaction(**kwargs):
-        pass
-
-    def execute_transaction(**kwargs):
-        pass
+    def execute_statement(self, secretArn, resourceArn, database, sql, includeResultMetadata, transactionId, parameters=None):
+        return {"numberOfRecordsUpdated": 0}
 
 
 class TestRecordCollection:
@@ -176,9 +176,9 @@ class TestTransaction:
         }
 
         aurora = MockAurora()
-
         db = camus.Database(**payload, conn=aurora)
 
-        with db.transaction() as txid:
-            db.query("SELECT * FROM teste")
+        with raises(Exception, match="commit_transaction_error"):
+            with db.transaction() as txid:
+                db.query("SELECT * FROM teste")
 
