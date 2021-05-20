@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 import camus
+from unittest import mock
 
 from pytest import raises
 
@@ -10,6 +11,20 @@ IdRecord = namedtuple("IdRecord", "id")
 
 def check_id(i, row):
     assert row.id == i
+
+
+class MockAurora:
+    def begin_transaction(**kwargs):
+        pass
+
+    def commit_transaction(**kwargs):
+        pass
+
+    def rollback_transaction(**kwargs):
+        pass
+
+    def execute_transaction(**kwargs):
+        pass
 
 
 class TestRecordCollection:
@@ -151,12 +166,19 @@ class TestRecord:
         with raises(KeyError):
             record["email"]
 
+@mock.patch("camus.boto3")
 class TestTransaction:
-    def test_raise(self):
-        try:
-            camus.Database().transaction()
-        except:
-            assert 1 == 1
-        else:
-            assert 1== 2
-            
+    def test_raise(self, boto3):
+        payload = {
+            "secret_arn": 'arn:aws:secretsmanager:us-east-1:123456789012:secret:your-secret-name-ByH87J',
+            "resource_arn": 'arn:aws:rds:us-east-1:123456789012:cluster:your-cluster-name',
+            "dbname": 'testing'
+        }
+
+        aurora = MockAurora()
+
+        db = camus.Database(**payload, conn=aurora)
+
+        with db.transaction() as txid:
+            db.query("SELECT * FROM teste")
+
