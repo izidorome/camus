@@ -6,9 +6,9 @@ with open("README.md") as f:
 setuptools.setup(
     author="Rafael Izidoro",
     author_email="izidoro.rafa@gmail.com",
-    url="https://github.com/rizidoro/camus",
+    url="https://github.com/risparfinance/camus",
     name="camus",
-    version="0.4.0",
+    version="1.0.0",
     py_modules = ['camus'],
     package_data={'': ['LICENSE']},
     include_package_data=True,
