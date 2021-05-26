@@ -4,9 +4,6 @@ from contextlib import contextmanager
 
 import boto3
 
-aurora = boto3.client("rds-data")
-
-
 def isexception(obj):
     """Given an object, return a boolean indicating whether it is an instance
     or subclass of :py:class:`Exception`.
@@ -196,11 +193,17 @@ class Record(object):
 
 
 class Database:
-    def __init__(self, secret_arn, resource_arn, dbname):
+    def __init__(self, secret_arn, resource_arn, dbname, conn=None):
         self._secret_arn = secret_arn
         self._resource_arn = resource_arn
         self._dbname = dbname
         self._transactionId = None
+
+        if not conn:
+            aurora = boto3.client("rds-data")
+            self._conn = aurora
+        else:
+            self._conn = conn
 
     def _auth(self):
         return {
@@ -211,14 +214,15 @@ class Database:
     @contextmanager
     def transaction(self):
         """A context manager for executing a transaction on this Database."""
-        tx = aurora.begin_transaction(**self._auth(), database=self._dbname)
+        tx = self._conn.begin_transaction(**self._auth(), database=self._dbname)
         self._transactionId = tx['transactionId']
 
         try:
             yield self._transactionId
-            aurora.commit_transaction(**self._auth(), transactionId=self._transactionId)
+            self._conn.commit_transaction(**self._auth(), transactionId=self._transactionId)
         except:
-            aurora.rollback_transaction(**self._auth(), transactionId=tx['transactionId'])
+            self._conn.rollback_transaction(**self._auth(), transactionId=self._transactionId)
+            raise
         finally:
             self._transactionId = None
 
@@ -236,7 +240,7 @@ class Database:
         if self._transactionId:
             attrs["transactionId"] = self._transactionId
 
-        result = aurora.execute_statement(**attrs)
+        result = self._conn.execute_statement(**attrs)
 
         if "records" in result:
             columns = [meta["label"] for meta in result["columnMetadata"]]
